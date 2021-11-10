@@ -7,7 +7,7 @@ use section_collector::SectionCollector;
 
 pub extern crate driver;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Point {
     pub len: u16,
     pub dir: u16,
