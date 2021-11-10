@@ -11,24 +11,21 @@ impl SectionCollector {
         Self {
             len_each,
             current: 0,
-            buffer: Vec::with_capacity(len_each as usize / 10),
+            buffer: Vec::new(),
         }
     }
 
     pub fn push(&mut self, p: Point) -> Option<(u8, Vec<Point>)> {
-        let i = (p.dir / self.len_each) as u8;
-        let result = if self.current == i {
-            None
-        } else {
-            Some((
-                std::mem::replace(&mut self.current, i),
-                std::mem::replace(
-                    &mut self.buffer,
-                    Vec::with_capacity(self.len_each as usize / 10),
-                ),
-            ))
-        };
-
+        // 计算分区序号，如果不属于当前分区则更新分区
+        let result = Some((p.dir / self.len_each) as u8)
+            .filter(|i| *i != self.current)
+            .map(|i| {
+                let capacity = self.buffer.capacity();
+                (
+                    std::mem::replace(&mut self.current, i),
+                    std::mem::replace(&mut self.buffer, Vec::with_capacity(capacity)),
+                )
+            });
         if p.len > 0 {
             self.buffer.push(p);
         }
