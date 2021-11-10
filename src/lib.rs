@@ -8,6 +8,13 @@ use section_collector::SectionCollector;
 pub extern crate driver;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Config {
+    pub len_meter: u16,
+    pub dir_round: u16,
+    pub zipped_size: usize,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Point {
     pub len: u16,
     pub dir: u16,
