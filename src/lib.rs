@@ -16,38 +16,43 @@ pub struct Point {
 pub trait LidarDriver: 'static + Send + Sized {
     type Key;
 
+    /// 列出操作系统上的设备键-
     fn keys() -> Vec<Self::Key>;
+
+    /// 启动确认超时
     fn open_timeout() -> Duration;
+
+    /// 解析超时
     fn parse_timeout() -> Duration;
+
+    /// 一整圈对应的角度值
     fn max_dir() -> u16;
 
     fn new(t: &Self::Key) -> Option<Self>;
+
+    /// 从设备中接收数据到缓冲区
     fn receive(&mut self) -> bool;
+
+    /// 从缓冲区解析一点
+    ///
+    /// 缓冲区空时返回 [`None`]
     fn parse(&mut self) -> Option<Point>;
 }
 
 pub struct Lidar<T: LidarDriver> {
-    inner: T,
+    /// 内部实际驱动，用于支持设备特异性功能
+    pub inner: T,
     last_time: Instant,
     section: SectionCollector,
-    filter: fn(Point) -> bool,
-}
-
-impl<T: LidarDriver> Lidar<T> {
-    pub fn actual<'a>(&'a mut self) -> &'a mut T {
-        &mut self.inner
-    }
-
-    pub fn filter_mut<'a>(&'a mut self) -> &'a mut fn(Point) -> bool {
-        &mut self.filter
-    }
+    /// 点过滤器
+    pub filter: fn(Point) -> bool,
 }
 
 impl<T: LidarDriver> MultipleDeviceDriver for Lidar<T> {
     type Command = fn(Point) -> bool;
 
     fn send(&mut self, command: Self::Command) {
-        *self.filter_mut() = command;
+        self.filter = command;
     }
 }
 
